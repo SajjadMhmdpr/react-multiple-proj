@@ -1,21 +1,35 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 
-export default function usePaginationHook(datas) {
-  const [listItems, setListItems] = useState([]);
+export default function usePaginationHook(datas, localValue): PaginationResult {
+  const [listItems, setListItems] = useState<Todo[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
 
   const countRow = 4;
 
   useEffect(() => {
     console.log("usePaginationHook => datas updated");
-    let filtered = getRandomItems(datas, 30);
-    setListItems((prev) => {
-      const todosJson = localStorage.getItem("todos");
-      const addedLocalTodos = todosJson ? JSON.parse(todosJson) : null;
-      if (addedLocalTodos !== null) return [...filtered, ...addedLocalTodos];
-      return filtered;
-    });
+
+    const filtered = getRandomItems(datas, 30);
+
+    setListItems(filtered);
   }, [datas]);
+
+  useEffect(() => {
+    console.log("usePaginationHook => localStorage updated");
+
+    if (localValue.length === 0) return;
+
+    setListItems((prev) => {
+      const newTodo = localValue[localValue.length - 1];
+
+      // جلوگیری از اضافه شدن تکراری
+      if (prev.some((x) => x.id === newTodo.id)) {
+        return prev;
+      }
+
+      return [...prev, newTodo];
+    });
+  }, [localValue]);
 
   const pageCount = Math.ceil(listItems.length / countRow);
 
@@ -27,7 +41,13 @@ export default function usePaginationHook(datas) {
     setCurrentPage(page);
   }, []);
 
-  return [paginatedItems, currentPage, handlePageChange, pageCount];
+  return [
+    paginatedItems,
+    currentPage,
+    pageCount,
+    handlePageChange,
+    setListItems,
+  ];
 }
 
 function getRandomItems(array, count) {
@@ -41,3 +61,17 @@ function getRandomItems(array, count) {
 
   return result.slice(0, count);
 }
+
+type Todo = {
+  userId: number;
+  id: number;
+  title: string;
+  completed: boolean;
+};
+type PaginationResult = [
+  Todo[],
+  number,
+  number,
+  (event: React.ChangeEvent<unknown>, page: number) => void,
+  React.Dispatch<React.SetStateAction<Todo[]>>,
+];

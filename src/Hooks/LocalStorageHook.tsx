@@ -14,5 +14,13 @@ export default function useLocalStorageHook(key, val) {
     setValue((prev) => [...prev, newValue]);
   };
 
-  return [value, addValue];
+  return [value, addValue, getLastId(key)];
 }
+
+const getLastId = (key) => {
+  const arr = JSON.parse(localStorage.getItem(key) || "[]");
+
+  const maxId = arr.length > 0 ? Math.max(...arr.map((i) => i.id)) + 1 : 201;
+
+  return maxId;
+};

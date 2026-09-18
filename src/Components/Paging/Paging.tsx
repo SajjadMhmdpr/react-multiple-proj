@@ -2,7 +2,13 @@ import React, { useState, memo } from "react";
 import Pagination from "@mui/material/Pagination";
 import Box from "@mui/material/Box";
 
-const Paging = memo(({ count, page, handlePageChange }) => {
+type PagingProps = {
+  count: number;
+  page: number;
+  handlePageChange: (event: React.ChangeEvent<unknown>, page: number) => void;
+};
+
+const Paging = memo(({ count, page, handlePageChange }: PagingProps) => {
   console.log("khkhkhkhkhkhkkhkhkhkkh :)))))))))))");
   return (
     <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>

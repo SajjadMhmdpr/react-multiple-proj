@@ -8,7 +8,7 @@ export default function useFetchHook(url) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    console.log("useFetchHook => mount ");
+    console.log("useFetchHook => update ");
 
     fetch(url)
       .then((res) => {
@@ -27,6 +27,6 @@ export default function useFetchHook(url) {
         setError(err);
         setIsPending(false);
       });
-  }, []);
+  }, [url]);
   return [list, isPending, error];
 }

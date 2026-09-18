@@ -13,17 +13,42 @@ import Typography from "@mui/material/Typography";
 import WorkIcon from "@mui/icons-material/Work";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckIcon from "@mui/icons-material/Check";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import Paging from "./../../Components/Paging/Paging";
+import CircularProgress from "@mui/material/CircularProgress";
 
-export default function TodoItems() {
+export default function TodoItems({ localValue }: TodoItemsProps) {
   //console.log("TodoItems ");
 
   const [datas, isPending, error] = useFetchHook(
     "https://jsonplaceholder.typicode.com/todos",
   );
 
-  const [paginatedItems, currentPage, handlePageChange, pageCount] =
-    usePaginationHook(datas);
+  const [
+    paginatedItems,
+    currentPage,
+    pageCount,
+    handlePageChange,
+    setListItems,
+  ] = usePaginationHook(datas, localValue);
+
+  const handleRedo = (id) => {
+    setListItems((prev) => {
+      return prev.map((item) =>
+        item.id === id ? { ...item, completed: false } : item,
+      );
+    });
+  };
+  const handleDelete = (id) => {
+    setListItems((prev) => prev.filter((item) => item.id !== id));
+  };
+  const handleCheck = (id) => {
+    setListItems((prev) => {
+      return prev.map((item) =>
+        item.id === id ? { ...item, completed: true } : item,
+      );
+    });
+  };
 
   return (
     <>
@@ -42,7 +67,9 @@ export default function TodoItems() {
         }}
       >
         <Box sx={{ width: "50%", overflow: "auto" }}>
-          {isPending && <div>Loading.......</div>}
+          {isPending && (
+            <CircularProgress color="secondary" aria-label="Loading…" />
+          )}
           {error && <div>{error}</div>}
           {datas && (
             <List>
@@ -50,21 +77,50 @@ export default function TodoItems() {
                 //console.log(data);
                 return (
                   <ListItem
+                    sx={{
+                      textDecoration: data.completed ? "line-through" : "none",
+                    }}
                     key={data.id}
                     secondaryAction={
-                      <Box sx={{ display: "flex", gap: 1 }}>
-                        <IconButton edge="end" aria-label="delete">
-                          <CheckIcon sx={{ color: "#1a923e" }} />
-                        </IconButton>
-                        <IconButton edge="end" aria-label="delete">
-                          <DeleteIcon sx={{ color: "#f50505" }} />
-                        </IconButton>
-                      </Box>
+                      !data.completed ? (
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                          <IconButton
+                            edge="end"
+                            aria-label="check"
+                            onClick={() => {
+                              handleCheck(data.id);
+                            }}
+                          >
+                            <CheckIcon sx={{ color: "#1a923e" }} />
+                          </IconButton>
+                          <IconButton
+                            edge="end"
+                            aria-label="delete"
+                            onClick={() => {
+                              handleDelete(data.id);
+                            }}
+                          >
+                            <DeleteIcon sx={{ color: "#f50505" }} />
+                          </IconButton>
+                        </Box>
+                      ) : (
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                          <IconButton
+                            edge="end"
+                            aria-label="redo"
+                            onClick={() => {
+                              handleRedo(data.id);
+                            }}
+                          >
+                            <RefreshIcon sx={{ color: "#d1dd1f" }} />
+                          </IconButton>
+                        </Box>
+                      )
                     }
                   >
                     <ListItemAvatar>
                       <Avatar>
-                        <WorkIcon sx={{ color: "#d4ff00" }} />
+                        <WorkIcon sx={{ color: "#00eeff" }} />
                       </Avatar>
                     </ListItemAvatar>
                     <Box sx={{ width: "70%" }}>
@@ -88,3 +144,13 @@ export default function TodoItems() {
     </>
   );
 }
+
+type TodoItemsProps = {
+  localValue: Todo[];
+};
+type Todo = {
+  userId: number;
+  id: number;
+  title: string;
+  completed: boolean;
+};
