@@ -14,9 +14,9 @@ import MenuItem from "@mui/material/MenuItem";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import { Link, NavLink } from "react-router";
 import routes from "./../../router";
+import { getNavbarRoutes } from "./../../Utils";
 
-//const pages = ["Todo List", "Products", "Clock", "Login", "Chat"];
-const pages = routes.filter((r) => r.title !== "/");
+const pages = getNavbarRoutes(routes);
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
 function Header() {
@@ -108,7 +108,7 @@ function Header() {
                   <Typography sx={{ textAlign: "center" }}>
                     <Button
                       component={NavLink}
-                      to={`/${page.title.replaceAll(" ", "")}`}
+                      to={page.path}
                       onClick={handleCloseNavMenu}
                       sx={{
                         my: 0,
@@ -151,7 +151,7 @@ function Header() {
             {pages.map((page, index) => (
               <Button
                 component={NavLink}
-                to={`/${page.title.replaceAll(" ", "")}`}
+                to={page.path}
                 key={page.title}
                 onClick={handleCloseNavMenu}
                 sx={{
